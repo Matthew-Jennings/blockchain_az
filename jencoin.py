@@ -205,5 +205,23 @@ if __name__ == "__main__":
 
         return response, HTTPStatus.CREATED
 
+    @app.route("/replace_chain", methods=["GET"])
+    def replace_chain():
+
+        is_chain_replaced = blockchain.replace_chain()
+
+        if is_chain_replaced:
+            response = {
+                "message": "The chain was replaced with the longest chain!",
+                "new_chain": blockchain.chain,
+            }
+        else:
+            response = {
+                "message": "The current is the longest. Chain was not replaced!",
+                "chain": blockchain.chain,
+            }
+
+        return jsonify(response), HTTPStatus.OK
+
     # Must come after decorators above
     app.run(host="0.0.0.0", port=5000)
