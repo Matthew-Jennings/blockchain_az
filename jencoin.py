@@ -108,7 +108,7 @@ class Blockchain:
             response = requests.get(f"http://{node}/get_chain")
 
             if response.status_code == HTTPStatus.OK:
-                length = response.json()["length":]
+                length = response.json()["length"]
                 chain = response.json()["chain"]
 
                 if length > max_length and self.is_chain_valid(chain):
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     app = Flask(__name__)
 
-    node_address = str(uuid4()).replace("_", "")
+    node_address = str(uuid4()).replace("-", "")
 
     blockchain = Blockchain()
 
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
     @app.route("/add_tx", methods=["POST"])
     def add_tx():
-        json = requests.get_json()
+        json = request.get_json()
 
         tx_keys = ["sender", "receiver", "amount"]
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     @app.route("/connect_node", methods=["POST"])
     def connect_node():
-        json = requests.get_json()
+        json = request.get_json()
         nodes = json.get("nodes")
 
         if nodes is None:
