@@ -172,9 +172,6 @@ if __name__ == "__main__":
 
         return jsonify(response), HTTPStatus.OK
 
-    # Must come after decorators above
-    app.run(host="0.0.0.0", port=5000)
-
     @app.route("/add_tx", methods=["POST"])
     def add_tx():
         json = requests.get_json()
@@ -189,3 +186,24 @@ if __name__ == "__main__":
         response = {"message": f"This tx will be added to block #{idx}"}
 
         return response, HTTPStatus.CREATED
+
+    @app.route("/connect_node", methods=["POST"])
+    def connect_node():
+        json = requests.get_json()
+        nodes = json.get("nodes")
+
+        if nodes is None:
+            return "No nodes", HTTPStatus.BAD_REQUEST
+
+        for node in nodes:
+            blockchain.add_node(node)
+
+        response = {
+            "message": "All nodes connected! The Jencoin blockchain node contains the following nodes:",
+            "total_nodes": list(blockchain.nodes),
+        }
+
+        return response, HTTPStatus.CREATED
+
+    # Must come after decorators above
+    app.run(host="0.0.0.0", port=5000)
