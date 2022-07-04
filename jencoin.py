@@ -127,7 +127,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     app = Flask(__name__)
-    # app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
+
+    node_address = str(uuid4()).replace("_", "")
 
     blockchain = Blockchain()
 
@@ -139,6 +140,8 @@ if __name__ == "__main__":
 
         previous_hash = blockchain.hash(previous_block)
 
+        txs = blockchain.add_tx(sender=node_address, receiver="Matthew", amount=6.25)
+
         block = blockchain.create_block(proof, previous_hash)
 
         response = {
@@ -147,9 +150,10 @@ if __name__ == "__main__":
             "timestamp": block["timestamp"],
             "proof": block["proof"],
             "previous_hash": block["previous_hash"],
+            "txs": block["txs"],
         }
 
-        return jsonify(response), HTTPStatus.CREATED
+        return jsonify(response), HTTPStatus.OK
 
     @app.route("/get_chain", methods=["GET"])
     def get_chain():
@@ -170,3 +174,18 @@ if __name__ == "__main__":
 
     # Must come after decorators above
     app.run(host="0.0.0.0", port=5000)
+
+    @app.route("/add_tx", methods=["POST"])
+    def add_tx():
+        json = requests.get_json()
+
+        tx_keys = ["sender", "receiver", "amount"]
+
+        if not all(key in json for key in tx_keys):
+            return "Some elements of the tx are missing", HTTPStatus.BAD_REQUEST
+
+        idx = blockchain.add_tx(json["sender"], json["receiver"], json["amount"])
+
+        response = {"message": f"This tx will be added to block #{idx}"}
+
+        return response, HTTPStatus.CREATED
